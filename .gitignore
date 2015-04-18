@@ -13,12 +13,4 @@ vignettes/*.html
 vignettes/*.pdf
 
 #specific R scripts
-Step1_preprocessAffy.R
-Step1_preprocessLumi.R
-Step1_preprocessRNAseq.R
-Step2_dataExploration.R
-Step3_dataWrangling.R
-Step4_plottingData.R
-Step5_diffGenes.R
-Step6_heatmap.R
-Step7_geneSetAnalysis.R
+*.txt
