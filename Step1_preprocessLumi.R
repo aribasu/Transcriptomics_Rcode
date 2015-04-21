@@ -52,20 +52,6 @@ summary(normData, 'QC')
 hist(normData, xlab = "log2 expression", main = "non-normalized data - histograms", col=cols.ALL)
 boxplot(normData, ylab = "non-normalized log2 expression", main = "non-normalized data - boxplots", col=cols.ALL)
 
-
-###############################################################################################
-# also output unfiltered expression data.  
-###############################################################################################
-write.exprs(normData, file='robustSplineNorm.txt')
-normData.delim <- read.delim("robustSplineNorm.txt", header=TRUE, row.names=1)
-normData.matrix <- as.matrix(normData.delim)
-probeList2 <- rownames(normData.matrix)
-library(annotate)
-symbols <- getSYMBOL(probeList2, "lumiMouseAll.db")
-entrezIDs <- getEG(probeList2, "lumiMouseAll.db")
-write.table(cbind(symbols, entrezIDs, normData.matrix), "unfiltered_expressionData.xls", sep="\t", quote=FALSE)
-
-
 ######################################################
 # filter out probes that don't change (low variance)
 # remove duplicate genes based on entrez ID
@@ -85,7 +71,7 @@ head(filtered.matrix)
 
 
 ###############################################################################################
-# output this data to a table that can be used in Excel or Datagraph
+# output this filtered data to a table that can be used in Excel or other programs
 # This file contains genes after normalization and filtering
 ###############################################################################################
 # first need to get all the gene symbols and entrez IDs so you can put everything together
@@ -96,5 +82,15 @@ myEntrezAll <- getEG(probeList, "lumiMouseAll.db")
 myEntrezAll <- as.matrix(myEntrezAll)
 write.table(cbind(myGenesAll, myEntrezAll, filtered.matrix),"normalizedFilteredData.txt", sep="\t", quote=FALSE)
 
-# before this data is ready for the next step, open the text file
-# clean-up table so that only gene symbols and log2 data are present
+###############################################################################################
+# also output unfiltered expression data.  
+###############################################################################################
+write.exprs(normData, file='robustSplineNorm.txt')
+normData.delim <- read.delim("robustSplineNorm.txt", header=TRUE, row.names=1)
+normData.matrix <- as.matrix(normData.delim)
+probeList2 <- rownames(normData.matrix)
+library(annotate)
+symbols <- getSYMBOL(probeList2, "lumiMouseAll.db")
+entrezIDs <- getEG(probeList2, "lumiMouseAll.db")
+write.table(cbind(symbols, entrezIDs, normData.matrix), "unfiltered_expressionData.xls", sep="\t", quote=FALSE)
+
