@@ -3,7 +3,7 @@
 # the second file should contain probe set data for controls
 
 # being by loading the lumi package
-# if using human arrays, change 'mouse' to 'human' for the mapping and .db packages below
+# if using Mouse arrays, change 'Mouse' to 'Mouse' for the mapping and .db packages below
 library(lumi)
 library(lumiMouseIDMapping)
 library(lumiMouseAll.db)
@@ -12,16 +12,16 @@ library(lumiMouseAll.db)
 # Read in the GenomeStudio output files using the 'LumiR' and 'addControlData2lumi' functions
 # This will create 'LumiBatch' objects from the control and experimental probe data
 ###############################################################################################
-rawData <- lumiR("FinalReport_NoNorm_NoBkrnd_samples.txt", convertNuID = TRUE, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = "lumiMouseIDMapping")
+rawData <- lumiR("FinalReport_samples_probes_NoNorm_NoBkrnd.txt", convertNuID = TRUE, sep = NULL, detectionTh = 0.01, na.rm = TRUE, lib = "lumiMouseIDMapping")
 rawData
 
 # Read control probe data into a separate LumiBatch and take a look at these controls
-rawData <- addControlData2lumi("FinalReport_NoNorm_NoBkrnd_controls.txt", rawData)
+rawData <- addControlData2lumi("FinalReport_controls_probes_NoNorm_NoBkrnd.txt", rawData)
 rawData
 controlData <- getControlData(rawData)
 getControlType(controlData)
 plotStringencyGene(rawData, lib = NULL, slideIndex = NULL, addLegend = TRUE, logMode = TRUE)
-plotControlData(rawData, type = 'NEGATIVE', slideIndex = NULL, logMode = TRUE, new = TRUE)
+plotControlData(rawData, type = 'HOUSEKEEPING', slideIndex = NULL, logMode = TRUE, new = TRUE)
 plotHousekeepingGene(rawData)
 
 ###############################################################################################
@@ -30,7 +30,7 @@ plotHousekeepingGene(rawData)
 summary(rawData, 'QC')
 
 # choose color scheme for graphs
-cols.ALL <- topo.colors(n=8, alpha=1)
+cols.ALL <- topo.colors(n=16, alpha=1)
 
 hist(rawData, xlab = "log2 expression", main = "non-normalized data - histograms")
 boxplot(rawData, ylab = "non-normalized log2 expression", main = "non-normalized data - boxplots", col=cols.ALL)
@@ -76,6 +76,7 @@ head(filtered.matrix)
 ###############################################################################################
 # first need to get all the gene symbols and entrez IDs so you can put everything together
 library(annotate)
+keytypes(lumiMouseAll.db)
 myGenesAll <- getSYMBOL(probeList, "lumiMouseAll.db")
 myGenesAll <- as.matrix(myGenesAll)
 myEntrezAll <- getEG(probeList, "lumiMouseAll.db")
