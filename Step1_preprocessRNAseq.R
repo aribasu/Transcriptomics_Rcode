@@ -63,6 +63,7 @@ fc <- featureCounts(files=MyBAM, annot.ext="Mus_musculus.GRCm38.79.gtf", isGTFAn
                     GTF.attrType="gene_id", useMetaFeatures=TRUE, isPairedEnd=TRUE, requireBothEndsMapped=TRUE, strandSpecific=2, nthreads=8)
 #use the 'DGEList' function from EdgeR to make a 'digital gene expression list' object
 DGEList <- DGEList(counts=fc$counts, genes=fc$annotation)
+load("DGEList")
 #retrieve all your gene/transcript identifiers from this DGEList object
 myEnsemblIDs <- DGEList$genes$GeneID
 dim(fc$counts)

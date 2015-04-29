@@ -14,4 +14,6 @@ vignettes/*.pdf
 
 #specific R scripts
 *.txt
+*.xlsx
+*.xls
 .Rproj.user
