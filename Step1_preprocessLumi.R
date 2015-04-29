@@ -93,5 +93,5 @@ probeList2 <- rownames(normData.matrix)
 library(annotate)
 symbols <- getSYMBOL(probeList2, "lumiMouseAll.db")
 entrezIDs <- getEG(probeList2, "lumiMouseAll.db")
-write.table(cbind(symbols, entrezIDs, normData.matrix), "unfiltered_expressionData.xls", sep="\t", quote=FALSE)
+write.table(cbind(symbols, entrezIDs, normData.matrix), "unfiltered_expressionData.txt", sep="\t", quote=FALSE)
 
