@@ -29,7 +29,7 @@ library(affycoretools)
 normData.main <- getMainProbes(normData)
 #now extract the expression data from the eset filtered eset object you just created
 normData.main.matrix <- exprs(normData.main)
-dim(normData.main.matrix)
+dim(normData.main.matrix
 
 #an additional filtering step can be carried out using the 'nsFilter' function 
 #allows you to filter out low variance data, as well as the control probes mentioned above

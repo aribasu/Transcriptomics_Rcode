@@ -11,12 +11,11 @@ options(digits=2)
 #library(Biostrings)
 
 #read in your study design file
-targets <- readTargets("Igor_Ripk3_BMMC_studyDesign.txt", row.names=NULL)
+targets <- readTargets("Igor_Ripk3_BMMC_studyDesign_RNAseq.txt", row.names=NULL)
 targets
-targets.mod <- targets[1:12,]
-groups <- factor(paste(targets.mod$genotype, targets.mod$treatment, sep="."))
+groups <- factor(paste(targets$genotype, targets$treatment, sep="."))
 #create some more human-readable labels for your samples using the info in this file
-sampleLabels <- paste(targets.mod$genotype, targets.mod$treatment, targets.mod$rep, sep=".")
+sampleLabels <- paste(targets$genotype, targets$treatment, targets$rep, sep=".")
 
 #set-up your experimental design
 design <- model.matrix(~0+groups)
@@ -103,7 +102,6 @@ head(exprs.matrix.filtered)
 ##############################################################################################################################
 library(org.Mm.eg.db)
 library(AnnotationDbi)
-ls("package:org.Mm.eg.db")
 #If we want to know what kinds of data are retriveable via the 'select' command, look at the columns of the annotation database
 columns(org.Mm.eg.db)
 #If we want to know what kinds of fields we could potentially use as keys to query the database, use the 'keytypes' command
