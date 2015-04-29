@@ -41,7 +41,6 @@ pc.per
 
 #make some graphs to visualize your PCA result
 library(ggplot2)
-
 #lets first plot any two PCs against each other
 #turn your scores for each gene into a data frame
 data.frame <- as.data.frame(pca.res$x)
