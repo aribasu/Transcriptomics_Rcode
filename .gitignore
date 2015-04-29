@@ -12,5 +12,6 @@
 vignettes/*.html
 vignettes/*.pdf
 
-#specific R scripts
+#specific data files
 *.txt
+*.cel
