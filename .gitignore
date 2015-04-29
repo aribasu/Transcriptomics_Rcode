@@ -14,10 +14,7 @@ vignettes/*.pdf
 
 #specific data files
 *.txt
-<<<<<<< HEAD
 *.xlsx
 *.xls
 .Rproj.user
-=======
 *.cel
->>>>>>> 936914e4a9df5ffc293f1401077fc7e8e148e342
