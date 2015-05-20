@@ -70,3 +70,17 @@ heatmap.2(ysub, Rowv=as.dendrogram(hrsub), Colv=NA, col=myheatcol, scale="row", 
 myCluster <- cbind(getSYMBOL(clusterIDs, "lumiMouseAll.db"), getEG(clusterIDs, "lumiMouseAll.db"))
 write.table(myCluster, "Cluster7.xls", sep="\t", quote=FALSE)
 
+###############################################################################################
+#read in your own data to make a heatmap
+###############################################################################################
+mySelected <- read.delim("WTvsPHIL_selected.txt", sep="\t", stringsAsFactors = FALSE, header=TRUE, row.names=1)
+mySelected.matrix <- as.matrix(mySelected)
+#carry out hclust on the collapsed data matrix to generate a distance matrix for clustering
+heatmap.2(mySelected.matrix, Rowv=NA, Colv=NA, col=myheatcol, scale="row", density.info="none", trace="none", labCol=NA, cexRow=1.5, cexCol=1, margins=c(20,28), key = F) # Creates heatmap for entire data set where the obtained clusters are indicated in the color bar.
+
+###############################################################################################
+#use dplyr 'filter' and 'select' to get table for heatmap
+###############################################################################################
+
+
+

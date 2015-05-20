@@ -82,7 +82,7 @@ head(exprs.matrix.unfiltered)
 #if you need RPKM for your unfiltered, they can generated as follows
 #Although RPKM are commonly used, not really necessary since you don't care to compare two different genes within a sample
 rpkm.unfiltered <- rpkm(DGEList, DGEList$genes$Length)
-tail(rpkm)
+rpkm.unfiltered <- log2(rpkm.unfiltered + 1)
 
 ##############################################################################################################################
 #Filtering your dataset
@@ -91,11 +91,15 @@ tail(rpkm)
 cpm.matrix.filtered <- rowSums(cpm(DGEList) > 10) >= 2
 DGEList.filtered <- DGEList[cpm.matrix.filtered,]
 dim(DGEList.filtered)
+rpkm.filtered <- rpkm(DGEList.filtered, DGEList.filtered$genes$Length) #if you prefer, can use 'cpm' instead of 'rpkm' here
+rpkm.filtered <- log2(rpkm.filtered + 1)
+
 #Use Voom again to normalize this filtered dataset
 normData <- voom(DGEList.filtered, design, plot=TRUE)
 exprs <- normData$E
 exprs.matrix.filtered <- as.matrix(exprs)
 head(exprs.matrix.filtered)
+
 
 ##############################################################################################################################
 #annotate your normalized data using the organism-specific database package
@@ -107,15 +111,71 @@ columns(org.Mm.eg.db)
 #If we want to know what kinds of fields we could potentially use as keys to query the database, use the 'keytypes' command
 keytypes(org.Mm.eg.db)
 #transform you identifiers to entrezIDs
-myAnnot.unfiltered <- select(org.Mm.eg.db, keys=rownames(exprs.matrix.unfiltered), keytype="ENSEMBL", columns=c("ENTREZID", "SYMBOL", "GENENAME"))
-myAnnot.filtered <- select(org.Mm.eg.db, keys=rownames(exprs.matrix.filtered), keytype="ENSEMBL", columns=c("ENTREZID", "SYMBOL", "GENENAME"))
+myAnnot.unfiltered <- select(org.Mm.eg.db, keys=rownames(exprs.matrix.unfiltered), keytype="ENSEMBL", columns=c("ENTREZID", "REFSEQ", "UNIGENE", "GENENAME", "SYMBOL"))
+myAnnot.filtered <- select(org.Mm.eg.db, keys=rownames(exprs.matrix.filtered), keytype="ENSEMBL", columns=c("ENTREZID", "REFSEQ", "UNIGENE", "GENENAME", "SYMBOL"))
 resultTable.unfiltered <- merge(myAnnot.unfiltered, exprs.matrix.unfiltered, by.x="ENSEMBL", by.y=0)
 resultTable.filtered <- merge(myAnnot.filtered, exprs.matrix.filtered, by.x="ENSEMBL", by.y=0)
 head(resultTable.unfiltered)
 #add more appropriate sample names as column headers
-colnames(resultTable.unfiltered) <- sampleLabels
-colnames(resultTable.filtered) <- sampleLabels
+colnames(resultTable.unfiltered) <- c("Ensembl", "entrez", "refseq", "Unigene", "name", "symbol", sampleLabels)
+colnames(resultTable.filtered) <- c("Ensembl", "entrez", "refseq", "Unigene", "name", "symbol", sampleLabels)
 #now write these annotated datasets out
 write.table(resultTable.unfiltered, "normalizedUnfiltered.txt", sep="\t", quote=FALSE)
 write.table(resultTable.filtered, "normalizedFiltered.txt", sep="\t", quote=FALSE)
 head(resultTable.unfiltered)
+
+#########################################################################
+#If there isn't an R database package for your organism,
+#you can still annotate your data using the biomaRt package
+#########################################################################
+library(biomaRt)
+#list all the available 'marts' to choose from
+listMarts()
+#select your mart of interest
+vectorBase <- useMart("vb_gene_mart_1502")
+#list the databases available in that mart
+listDatasets(vectorBase)
+#select the database you want to work with
+aedesDB <- useDataset("aaegypti_eg_gene", mart=vectorBase)
+#list the various filters, or keys, that can used to access this database
+listFilters(aedesDB)
+#list all the attributes that can be retrieved from the database
+listAttributes(aedesDB)
+#pull out your rownames of your dataset to use as one of the filters
+myEnsemblIDs.filtered <- rownames(rpkm.filtered)
+myEnsemblIDs.unfiltered <- rownames(rpkm.unfiltered)
+#attach annotation information to your file
+myAnnot.filtered <- getBM(attributes = c("external_gene_id", "ensembl_gene_id", "description"),
+                          filters = "ensembl_gene_id",   #the kind of data you'll use as keys
+                          values = myEnsemblIDs.filtered,   #the exact data you'll use as keys
+                          mart=aedesDB)
+myAnnot.unfiltered <- getBM(attributes = c("external_gene_id", "ensembl_gene_id", "description"),
+                            filters = "ensembl_gene_id",
+                            values = myEnsemblIDs.unfiltered,
+                            mart=aedesDB)
+#merge the annotation information with the expression data
+resultTable.filtered <- merge(myAnnot.filtered, rpkm.filtered, by.x="ensembl_gene_id", by.y=0)
+resultTable.unfiltered <- merge(myAnnot.unfiltered, rpkm.unfiltered, by.x="ensembl_gene_id", by.y=0)
+
+# ##############################################################################################
+# #additional filtering based on annotation
+# #can skip this, since I like to do this right before differential gene expression analysis
+# ##############################################################################################
+# #our initial filtering above based on cpm, only removes relatively low expressed genes
+# #now that you have annotation info, you can further filter to reduce to single line of data per gene symbo using one of two options
+# #first, check out how many unqiue genes are represented in your data
+# dupFiltered <- unique(resultTable.filtered$symbol)
+# #use collapseRows function from WGCNA package to collapse your dataset
+# library(WGCNA)
+# #pull your rownames and unique identifiers
+# myIDs <- rownames(resultTable.filtered)
+# #retrieve your gene symbols from your data
+# mySymbols <- resultTable.filtered[,5]
+# #remove all annotation columns so you're left with only numeric data
+# resultTable <- resultTable.filtered[,-1:-6]
+# myCollapsed <- collapseRows(resultTable, mySymbols, myIDs, method = "MaxMean")
+# myCollapsed <- myCollapsed$datETcollapsed
+# #now that the matrix is collapsed to give non-redudant list of genes,
+# #you could set the symbols to be the row names and move on
+
+
