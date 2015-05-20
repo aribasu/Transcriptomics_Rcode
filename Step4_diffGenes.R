@@ -43,9 +43,11 @@ head(myData.filter)
 ###############################################################################################
 # use Limma to find differentially expressed genes between two or more conditions
 ###############################################################################################
-# fit the linear model to the filtered expression set
+# fit the linear model to your filtered expression data
 library(limma)
 fit <- lmFit(filtered.matrix, design)
+#add annotation into your linear model fit
+#don't really need to do this if you have RNAseq data
 library(annotate)
 fit$genes$Symbol <- getSYMBOL(probeList, "lumiMouseAll.db")
 fit$genes$Entrez <- getEG(probeList, "lumiMouseAll.db")
@@ -58,6 +60,7 @@ contrast.matrix
 
 # extract the linear model fit for the contrast matrix that you just defined above
 fits <- contrasts.fit(fit, contrast.matrix)
+#get bayesian stats for your linear model fit
 ebFit <- eBayes(fits)
 
 
@@ -71,7 +74,7 @@ probeList
 
 # use the 'decideTests' function to show Venn diagram for all diffexp genes for up to three comparisons
 results <- decideTests(ebFit, method="global", adjust.method="BH", p.value=0.05, lfc=0.59)
-
+#stats <- write.fit(ebFit)
 vennDiagram(results, include="up") #all pairwise comparisons on a B6 background
 
 
@@ -101,15 +104,5 @@ write.table(cbind(diffProbes, diffSymbols, diffEntrez, diffData),"DiffGenes.xls"
 # take a look at each expression matrix
 dim(diffData)
 
-#######################################
-#use the reportingTools package to share your gene expression data with others
-#########################################
- library(lattice)
-rep.theme <- reporting.theme()
-lattice.options(default.theme = rep.theme)
-deReport <- HTMLReport(shortName = ✬de_analysis✬,
-	+ title = ✬Analysis of my cool data✬,
-	+ reportDirectory = "./reports")
-publish(fit, deReport, eSet=ALL, factor=ALL$mol.biol, coef=2, n=100)
-finish(deReport)
+
 
